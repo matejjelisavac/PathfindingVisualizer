@@ -10,7 +10,7 @@ tileSet = [4,5,6,7,8,9,10,12,20,25]
 trialNum = 200
 
 braiding = True
-braidLevel = 1 # 1 in braidLevel dead ends looped at the start
+braidLevel = 1
 braidSet = [1,4,50,float('inf')]
 visualizeGen = False
 visualizePath = False
@@ -251,9 +251,6 @@ def dijkstra(start, end):
     end_time = time.time()
 
     execution_time = end_time - start_time
-    print("DIJ FOUND IN ", execution_time, "SECONDS")
-    print("Searched over ", searchCount, " cells out of ", len(cells))
-    print("Path length:", len(path))
     return [execution_time, searchCount, len(path), path]
 
 def astar(start, end):
@@ -311,16 +308,13 @@ def astar(start, end):
     end_time = time.time()
 
     execution_time = end_time - start_time
-    print("AST FOUND IN ", execution_time, "SECONDS")
-    print("Searched over ", searchCount, " cells out of ", len(cells))
-    print("Path length:", len(path))
     return [execution_time, searchCount, len(path), path]
 
 
 
-dijRawData = [] #2d array for time, cell searched, path length
+dijRawData = []
 astRawData = []
-rawData = [] #2D array for [trialNum, size,braidlevel]
+rawData = []
 
 sizes = []
 braidLevels = []
@@ -391,11 +385,7 @@ for j in range(len(braidSet)):
                     update()
 
 
-        print("GENERATION COMPLETE.")
-        print("Edge count: ", len(edges))
-        print("Cell count: ", len(cells))
-        print("////////////////////////////")
-
+        #Pathfinding
         start = cells_2d[rows-1][0]
         start.start = True
         end = cells_2d[rows//2][cols//2]
@@ -427,8 +417,6 @@ for j in range(len(braidSet)):
                 time.sleep(0.4)
 
             rawData.append([r+1,cols,braidLevel])
-            print("Trial", r+1, "complete")
-
 
             if dij[0] < ast[0]:
                 dijWinCount +=1
@@ -440,7 +428,7 @@ for j in range(len(braidSet)):
 
 
 
-
+        # Averages etc. for processed data
         sum1 = 0
         dijLowest = 9999999999
         dijHighest = -1
