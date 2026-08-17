@@ -10,7 +10,7 @@ tileSet = [4,5,6,7,8,9,10,12,20,25]
 trialNum = 200
 
 braiding = True
-braidLevel = 1
+braidLevel = 1 # 1 in braidLevel dead ends get culled
 braidSet = [1,4,50,float('inf')]
 visualizeGen = False
 visualizePath = False
