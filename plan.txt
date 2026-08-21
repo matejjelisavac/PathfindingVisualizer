@@ -1,4 +1,0 @@
-mazes.py
-	class Maze => allows for generation of a 2d Cell array of that maze
-	class Cell => as above. x and y coordinates, getNeighbors, etc.
-	class Algorithm => Choose between Dijksta or A-star (with heuristic boolean). step() method
