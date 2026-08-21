@@ -1,3 +1,4 @@
+HeapDict==1.0.1
 numpy==2.5.2
 pandas==3.0.5
 pygame==2.6.1
