@@ -1,69 +1,62 @@
 import heapq
-import maze
 Coord = tuple[int, int]
 
-class Step:
-	current: Coord
-	distances:dict[Coord,int]
-	queue:list[tuple[float, Coord]]
-	walked:set[tuple]
-	predecessors:dict[Coord,Coord]
+class _Snapshot:
+	# NOTE: distances/walked/predecessors are the search's live objects, not copies.
+	# Reading them mid-iteration (as the visualizer does) is correct; holding onto
+	# snapshots is not — every held snapshot shows the final state.
 
-	def __init__(self, start):
-		self.current = start
-		self.distances = {start:0}
-		self.queue = []
-		self.walked = set()
-		self.predecessors = {start: None}
-		pass
+	def __init__(self, current: Coord, distances: dict[Coord, int], walked: set[Coord], predecessors: dict[Coord, Coord]):
+		self.current = current
+		self.distances = distances
+		self.walked = walked
+		self.predecessors = predecessors
 
 def trace_path(predecessors: dict[Coord, Coord], end):
+	if end not in predecessors:
+		return []
+
 	path = []
 	curr = end
-	while predecessors[curr]:
-		path.insert(0,curr)
+	while curr is not None:
+		path.append(curr)
 		curr = predecessors[curr]
-	return list(path)
 
-	
+	path.reverse()
+	return path
 
-def search_step(step:Step, adjacency_list:dict[Coord,list[Coord]], heuristic):
+def _search(start, end, adjacency_list:dict[Coord,list[Coord]], heuristic):
 
-		step.walked.add(step.current)
+	current = start
+	distances = {start: 0}
+	queue = []
+	walked = set()
+	predecessors = {start: None}
 
-		for neighbor in adjacency_list[step.current]:
-			if neighbor in step.walked:
+	while True:
+		walked.add(current)
+
+		for neighbor in adjacency_list[current]:
+			if neighbor in walked:
 				continue
-			new_dist = step.distances[step.current] + 1 + heuristic(step.current)
-			if neighbor not in step.distances or new_dist < step.distances[neighbor]:
-				step.distances[neighbor] = new_dist
-				heapq.heappush(step.queue, (new_dist, neighbor))
-				step.predecessors[neighbor] = step.current
+			new_dist = distances[current] + 1
+			if neighbor not in distances or new_dist < distances[neighbor]:
+				distances[neighbor] = new_dist
+				# store g, prioritise by f = g + h
+				heapq.heappush(queue, (new_dist + heuristic(neighbor), neighbor))
+				predecessors[neighbor] = current
 
-		if not step.queue:
-			return None
-		_, next_cell = heapq.heappop(step.queue)
-		step.current = next_cell
-		return step
+		yield _Snapshot(current, distances, walked, predecessors)
 
-def dijkstra_step(step:Step, adjacency_list:dict[Coord,list[Coord]]):
-	return search_step(step, adjacency_list, lambda n : 0)
+		# exit after yielding so the goal frame is emitted
+		if current == end or not queue:
+			return
+		_, current = heapq.heappop(queue)
 
-def astar_step(step:Step, adjacency_list:dict[Coord,list[Coord]], end: Coord):
-	return search_step(step, adjacency_list, lambda n : abs(end[0] - step.current[0]) + abs(end[1] - step.current[1]))
+# Algorithms return path, full _Snapshot generator
 
 def dijkstra(start: Coord, end: Coord, adjacency_list: dict[Coord, list[Coord]]):
-	step = Step(start)
-	while step.current != end:
-		step = dijkstra_step(step, adjacency_list)
-	return trace_path(step.predecessors, end)
+	return _search(start, end, adjacency_list, lambda _ : 0)
 
 def astar(start: Coord, end: Coord, adjacency_list: dict[Coord, list[Coord]]):
-	step = Step(start)
-	while step.current != end:
-		step = astar_step(step, adjacency_list, end)
-	return trace_path(step.predecessors, end)
-
-
-adjacency_list = maze.recursive_backtracker(20,20)
-print(astar((0,0), (19,19), adjacency_list))
+	return _search(start, end, adjacency_list, lambda node : abs(end[0] - node[0]) + abs(end[1] - node[1]))

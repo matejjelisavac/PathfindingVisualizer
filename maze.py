@@ -1,11 +1,11 @@
 import graph
-from random import choice
+from random import choice, sample
 
-def recursive_backtracker(width, height):
+def recursive_backtracker(size, braid=0):
 
-	gr = graph.GridGraph.empty(width, height)
+	gr = graph.GridGraph.empty(size, size) # Non-square mazes not yet supported
 
-	current = choice(list(gr.adjacency.keys()))
+	current = choice(list(gr.adjacency_list.keys()))
 	path, visited = [current], set([current])
 
 	while path:
@@ -25,14 +25,13 @@ def recursive_backtracker(width, height):
 			path.append(current)
 			current = next
 
-	return gr.adjacency
+	# braid = fraction of dead ends removed, sampled uniformly at random.
+	# Snapshot the population first so the denominator can't shift as we add edges.
+	dead_ends = [coord for coord in gr.adjacency_list if len(gr.adjacency_list[coord]) == 1]
 
-	# count = 0
-	# for coord in adjacency:
-	# 	if len(adjacency[coord]) == 1:
-	# 		count+=1
-	# 		if count >= (1 / braid):
-	# 			addEdge(adjacency, coord, random.choice([neighbor for neighbor in getCellNeighbors(coord, size) if neighbor not in adjacency[coord]]))
-	# 			count = 0
+	for coord in sample(dead_ends, round(braid * len(dead_ends))):
+		options = [neighbor for neighbor in gr.grid_neighbors(coord) if neighbor not in gr.adjacency_list[coord]]
+		if options:
+			gr.add_edge(coord, choice(options))
 
-# print(recursive_backtracker(20,20))
+	return gr.adjacency_list

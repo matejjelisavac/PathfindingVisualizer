@@ -3,11 +3,11 @@ Coord = tuple[int, int]
 class GridGraph:
 	width: int
 	height: int
-	adjacency: dict[Coord, list[Coord]]
+	adjacency_list: dict[Coord, list[Coord]]
 
 
-	def __init__(self, width, height, adjacency):
-		self.width, self.height, self.adjacency = width, height, adjacency
+	def __init__(self, width, height, adjacency_list):
+		self.width, self.height, self.adjacency_list = width, height, adjacency_list
 
 	@classmethod
 	def empty(cls, width, height):
@@ -15,11 +15,8 @@ class GridGraph:
 		return cls(width, height, {n: [] for n in nodes})
 
 	def add_edge(self, a, b):
-		self.adjacency[a].append(b)
-		self.adjacency[b].append(a)
-
-	def neighbors(self, node):        # connected — what search walks
-		return self.adjacency[node]
+		self.adjacency_list[a].append(b)
+		self.adjacency_list[b].append(a)
 
 	def grid_neighbors(self, node):   # adjacent in space — what generators consider
 		x, y = node
