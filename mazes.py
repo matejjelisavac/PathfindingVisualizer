@@ -2,6 +2,7 @@ import random
 import pygame
 from math import sqrt
 import heapdict
+import maze
 
 def getCellNeighbors(cell: tuple, mazeSize: int):
 
@@ -49,82 +50,6 @@ def getPath(predecessors:dict[tuple,tuple], fromCell:tuple, path:list[tuple] = [
 		return [*path, fromCell]
 	else:
 		return getPath(predecessors, predecessors[fromCell], [*path, fromCell])
-
-
-class Maze:
-
-	size = None # Maze becomes sizexsize
-	braid = None # 0->1. % of dead ends culled.
-	distances = False
-
-	def __init__(self):
-		pass
-
-	def setSize(self, size):
-		self.size = size
-		return self
-
-	def setBraid(self, braid):
-		if braid > 1 or braid <- 0:
-			raise ValueError(braid + " out of range 0 to 1")
-		self.braid = braid
-		return self
-
-	def showDistances(self):
-		self.distances = True
-		return self
-
-	def hideDistances(self):
-		self.distances = False
-
-	def generate(self):
-
-		if not self.braid or not self.size:
-			raise SyntaxError("Cannot run if missing size or braid values.")
-
-		# start = (random.randint(0,self.size-1),random.randint(0,self.size-1))
-		self.coords = [(x,y) for x in range(self.size) for y in range(self.size)]
-		self.adjacency = {coord:[] for coord in self.coords}
-
-		def backtrackStep(current:tuple, path:list[tuple], visited:set[tuple]):
-			neighbors = getCellNeighbors(current, self.size)
-
-			# If all neighbors already visited then backtrack
-			if all(neighbor in visited for neighbor in neighbors):
-				if path:
-					visited.add(current)
-					return path.pop()
-				# If path is empty then we are finished
-				else: 
-					return 
-
-			# Otherwise, if at least 1 neighbor not visited
-			else:
-				next = random.choice(neighbors)
-				while next in visited:
-					next = random.choice(neighbors)
-				addEdge(self.adjacency, current, next)
-				visited.add(current)
-				path.append(current)
-				return next
-
-		start = random.choice(self.coords)
-		path = []
-		visited = set()
-
-		current = backtrackStep(start, path, visited)
-		while path:
-			current = backtrackStep(current, path, visited)
-
-		count = 0
-		for coord in self.adjacency:
-			if len(self.adjacency[coord]) == 1:
-				count+=1
-				if count >= (1 / self.braid):
-					addEdge(self.adjacency, coord, random.choice([neighbor for neighbor in getCellNeighbors(coord, self.size) if neighbor not in self.adjacency[coord]]))
-					count = 0
-
-		return self.adjacency
 
 
 class Visualizer:
@@ -183,25 +108,23 @@ class Visualizer:
 		self.sc.blit(text_surface, (left+self.cellSize/2, top+self.cellSize/2))
 
 
-mazeSize = 50
+mazeSize = 20
 
-maze = Maze().setBraid(0.2).setSize(mazeSize).generate()
+mz = maze.recursive_backtracker(mazeSize,mazeSize)
 game = Visualizer(800, mazeSize)
 cell = (0,0)
 end = (mazeSize-1,mazeSize-1)
-distances, queue, walked, predecessors = {cell:0}, heapdict.heapdict(), set(), {cell:None}
-
 
 
 while True:
 	while cell != end:
 		game.sc.fill(game.bg)
-		cell = dijkstraStep(cell, distances, queue, walked, predecessors, maze)
+		cell = dijkstraStep(cell, distances, queue, walked, predecessors, mz)
 		for coord in predecessors:
 			game.fillCell(coord, pygame.Color(100,min(distances[coord], 255), 100))
 			# game.drawDistance(coord, distances[coord])
-		for coord in maze:
-			game.drawWalls(coord, maze)
+		for coord in mz:
+			game.drawWalls(coord, mz)
 		game.update()
 		# game.clock.tick(60)
 
