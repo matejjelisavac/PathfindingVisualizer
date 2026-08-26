@@ -3,7 +3,7 @@ Coord = tuple[int, int]
 class GridGraph:
 	width: int
 	height: int
-	adjacency_list: dict[Coord, list[Coord]]
+	adjacency_list: dict[Coord, set[Coord]]
 
 
 	def __init__(self, width, height, adjacency_list):
@@ -12,11 +12,12 @@ class GridGraph:
 	@classmethod
 	def empty(cls, width, height):
 		nodes = [(x, y) for x in range(width) for y in range(height)]
-		return cls(width, height, {n: [] for n in nodes})
+		return cls(width, height, {n: set() for n in nodes})
 
 	def add_edge(self, a, b):
-		self.adjacency_list[a].append(b)
-		self.adjacency_list[b].append(a)
+		# sets make a repeated edge a no-op rather than a duplicate
+		self.adjacency_list[a].add(b)
+		self.adjacency_list[b].add(a)
 
 	def grid_neighbors(self, node):   # adjacent in space — what generators consider
 		x, y = node

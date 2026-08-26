@@ -4,10 +4,10 @@ import time
 import pandas as pd
 import heapq
 
-size = 1000
+size = 800
 tileSet = [12,20,25]
 
-trialNum = 200
+trialNum = 1
 
 braiding = True
 braidLevel = 1 # 1 in braidLevel dead ends get culled

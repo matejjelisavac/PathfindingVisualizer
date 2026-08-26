@@ -35,3 +35,10 @@ def recursive_backtracker(size, braid=0):
 			gr.add_edge(coord, choice(options))
 
 	return gr.adjacency_list
+
+def fully_connected(size):
+	gr = graph.GridGraph.empty(size, size) # Non-square mazes not yet supported
+	for coord in gr.adjacency_list:
+		for neighbor in gr.grid_neighbors(coord):
+			gr.add_edge(coord, neighbor)
+	return gr.adjacency_list
