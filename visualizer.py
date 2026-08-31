@@ -1,7 +1,7 @@
-from math import sqrt as _sqrt
 import pygame as _pygame
 
 Coord = tuple[int, int]
+RGBValue = tuple[int,int,int]
 
 class Visualizer:
 	bg = "White"
@@ -10,17 +10,27 @@ class Visualizer:
 
 	def __init__(self, adjacency_list, display_size=800, fps=60):
 		self.adjacency_list = adjacency_list
-		self.cell_size = round(display_size / _sqrt(len(adjacency_list)))
+		self.width  = max(x for x, _ in adjacency_list) + 1
+		self.height = max(y for _, y in adjacency_list) + 1
+		self.cell_size = round(display_size / max(self.width, self.height))
 
 		_pygame.init()
-		self.sc = _pygame.display.set_mode((display_size, display_size))
+		self.sc = _pygame.display.set_mode(
+			(self.width * self.cell_size, self.height * self.cell_size))
 		self.fps = fps
 		self._clock = _pygame.time.Clock()
+		self._font = _pygame.font.SysFont('Comic Sans MS', max(1, self.cell_size // 4))
+		# walls live on their own transparent layer so fills can't cover them
+		self._wall_surface = _pygame.Surface(self.sc.get_size(), _pygame.SRCALPHA)
 
-	def _update(self):
+	# Drawing only writes to the surface; call present() to show a finished
+	# frame, so any number of draw calls can make up one frame.
+	def present(self):
 		for event in _pygame.event.get():
 			if event.type == _pygame.QUIT:
 				_pygame.quit()
+				raise SystemExit
+		self.sc.blit(self._wall_surface, (0, 0))
 		_pygame.display.flip()
 		self._clock.tick(self.fps)
 
@@ -47,25 +57,19 @@ class Visualizer:
 
 			for neighbor, start, end in walls:
 				if neighbor not in neighbors:
-					_pygame.draw.line(self.sc, self.wall, start, end)
-		self._update()
-					
-	def fill_cells(self, coords: list[Coord], color):
-		for coord in coords:
-			top, left, _, _ = self._get_cell(coord)
-			_pygame.draw.rect(self.sc, color, (left, top, self.cell_size, self.cell_size))
-		self._update()
+					_pygame.draw.line(self._wall_surface, self.wall, start, end)
+
+	def fill_cell(self, coord: Coord, color: str | RGBValue):
+		top, left, _, _ = self._get_cell(coord)
+		_pygame.draw.rect(self.sc, color, (left, top, self.cell_size, self.cell_size))
+
+	def draw_number(self, coord: Coord, number):
+		top, left, _, _ = self._get_cell(coord)
+		text_surface = self._font.render(str(number), False, _pygame.Color(self.font_color))
+		self.sc.blit(text_surface, (left+self.cell_size/2, top+self.cell_size/2))
 
 	def sleep(self, ms):
+		# holds the last presented frame, staying responsive to window events
 		start = _pygame.time.get_ticks()
 		while _pygame.time.get_ticks() - start < ms:
-			self._update()
-
-
-	# def draw_distance(self, coord, distance):
-	# 	top, left, _, _ = self._get_cell(coord)
-	# 	font = _pygame.font.SysFont('Comic Sans MS', int(self.cell_size/4))
-	# 	text_surface = font.render(str(distance), False, _pygame.Color(self.font_color))
-	# 	self.sc.blit(text_surface, (left+self.cell_size/2, top+self.cell_size/2))
-
-	
+			self.present()

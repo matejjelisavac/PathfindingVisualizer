@@ -1,28 +1,35 @@
 import maze
 import search
 import visualizer
-import time
 
-def animate(adjacency_list, start, end, path, steps):
+
+def animate(adjacency_list, start, end, steps):
 	vis = visualizer.Visualizer(adjacency_list, 800, 1000)
 	vis.draw_maze()
-	vis.fill_cells([start, end], "Purple")
+	vis.fill_cell(start, "Orange")
+	vis.fill_cell(end, "Orange")
+	vis.present()
 
 	for step in steps:
-		vis.fill_cells([step["next"]], "Orange")
-		vis.fill_cells([step["current"]], "Blue")
-		# vis.fill_cells(step["visited"], "Yellow")
-	vis.fill_cells(path,"Orange")
+		# for coord in step.discovered:
+		# 	vis.fill_cell(coord, "Blue")
+		vis.fill_cell(step.current, (min(step.distances[step.current]*2, 255), min(step.distances[step.current], 255), min(step.distances[step.current]*4, 255)))
+		vis.present()
+
+	# predecessors is live, so the last step already holds the finished search
+	for coord in search.trace_path(step.predecessors, end):
+		vis.fill_cell(coord, "Orange")
+	vis.present()
+
 	vis.sleep(250)
 
-maze_size = 250
-start, end = (0,0), (maze_size/2, maze_size/2)
 
-adjacency_list = maze.recursive_backtracker(maze_size, 1)
-# adjacency_list = maze.fully_connected(maze_size)
+if __name__ == "__main__":
+	width = 120
+	height = 120
+	start, end = (0,0), (width-1, height-1)
 
-path, steps = search.astar(start, end, adjacency_list)
-animate(adjacency_list, start, end, path, steps)
+	adjacency_list = maze.recursive_backtracker(width, height, 1)
 
-path, steps = search.dijkstra(start, end, adjacency_list)
-animate(adjacency_list, start, end, path, steps)
+	animate(adjacency_list, start, end, search.astar_steps(start, end, adjacency_list))
+	animate(adjacency_list, start, end, search.dijkstra_steps(start, end, adjacency_list))

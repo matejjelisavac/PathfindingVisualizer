@@ -1,9 +1,9 @@
 import graph
 from random import choice, sample
 
-def recursive_backtracker(size, braid=0):
+def recursive_backtracker(width, height, braid=0):
 
-	gr = graph.GridGraph.empty(size, size) # Non-square mazes not yet supported
+	gr = graph.GridGraph.empty(width, height)
 
 	current = choice(list(gr.adjacency_list.keys()))
 	path, visited = [current], set([current])
@@ -36,8 +36,8 @@ def recursive_backtracker(size, braid=0):
 
 	return gr.adjacency_list
 
-def fully_connected(size):
-	gr = graph.GridGraph.empty(size, size) # Non-square mazes not yet supported
+def fully_connected(width, height):
+	gr = graph.GridGraph.empty(width, height)
 	for coord in gr.adjacency_list:
 		for neighbor in gr.grid_neighbors(coord):
 			gr.add_edge(coord, neighbor)
