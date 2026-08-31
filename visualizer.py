@@ -15,13 +15,14 @@ class Visualizer:
 		_pygame.init()
 		self.sc = _pygame.display.set_mode((display_size, display_size))
 		self.fps = fps
-		self.clock = _pygame.time.Clock()
+		self._clock = _pygame.time.Clock()
 
 	def _update(self):
 		for event in _pygame.event.get():
 			if event.type == _pygame.QUIT:
 				_pygame.quit()
 		_pygame.display.flip()
+		self._clock.tick(self.fps)
 
 	def _get_cell(self, coords):
 		x,y = coords
@@ -48,17 +49,23 @@ class Visualizer:
 				if neighbor not in neighbors:
 					_pygame.draw.line(self.sc, self.wall, start, end)
 		self._update()
-		self.clock.tick(self.fps)
 					
 	def fill_cells(self, coords: list[Coord], color):
 		for coord in coords:
 			top, left, _, _ = self._get_cell(coord)
 			_pygame.draw.rect(self.sc, color, (left, top, self.cell_size, self.cell_size))
 		self._update()
-		self.clock.tick(self.fps)
 
-	def draw_distance(self, coord, distance):
-		top, left, _, _ = self._get_cell(coord)
-		font = _pygame.font.SysFont('Comic Sans MS', int(self.cell_size/4))
-		text_surface = font.render(str(distance), False, _pygame.Color(self.font_color))
-		self.sc.blit(text_surface, (left+self.cell_size/2, top+self.cell_size/2))
+	def sleep(self, ms):
+		start = _pygame.time.get_ticks()
+		while _pygame.time.get_ticks() - start < ms:
+			self._update()
+
+
+	# def draw_distance(self, coord, distance):
+	# 	top, left, _, _ = self._get_cell(coord)
+	# 	font = _pygame.font.SysFont('Comic Sans MS', int(self.cell_size/4))
+	# 	text_surface = font.render(str(distance), False, _pygame.Color(self.font_color))
+	# 	self.sc.blit(text_surface, (left+self.cell_size/2, top+self.cell_size/2))
+
+	
