@@ -1,3 +1,8 @@
+import os as _os
+
+# pygame greets stdout on import unless this exists; it checks for the name, not a value
+_os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+
 import pygame as _pygame
 
 Coord = tuple[int, int]

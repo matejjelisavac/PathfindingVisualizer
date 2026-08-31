@@ -1,19 +1,16 @@
-import maze
-import search
-import visualizer
+from pathviz import maze, search
+from pathviz.visualizer import Visualizer
 
 
 def animate(adjacency_list, start, end, steps):
-	vis = visualizer.Visualizer(adjacency_list, 800, 1000)
+	vis = Visualizer(adjacency_list, 800, 1000)
 	vis.draw_maze()
 	vis.fill_cell(start, "Orange")
 	vis.fill_cell(end, "Orange")
 	vis.present()
 
 	for step in steps:
-		# for coord in step.discovered:
-		# 	vis.fill_cell(coord, "Blue")
-		vis.fill_cell(step.current, (min(step.distances[step.current]*2, 255), min(step.distances[step.current], 255), min(step.distances[step.current]*4, 255)))
+		vis.fill_cell(step.current, (100, min(step.distances[step.current], 255), 100))
 		vis.present()
 
 	# predecessors is live, so the last step already holds the finished search

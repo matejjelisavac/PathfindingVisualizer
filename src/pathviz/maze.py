@@ -1,5 +1,6 @@
-import graph
 from random import choice, sample
+
+from . import graph
 
 def recursive_backtracker(width, height, braid=0):
 
