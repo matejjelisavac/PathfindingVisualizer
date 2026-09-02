@@ -22,8 +22,8 @@ classifiers = [
 dependencies = ["pygame>=2.6"]
 
 [project.urls]
-Source = "https://github.com/matejjelisavac/PathfindingVisualizer"
-Issues = "https://github.com/matejjelisavac/PathfindingVisualizer/issues"
+Source = "https://github.com/matejjelisavac/pathviz"
+Issues = "https://github.com/matejjelisavac/pathviz/issues"
 
 [tool.hatch.version]
 path = "src/pathviz/__init__.py"
